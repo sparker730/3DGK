@@ -1,5 +1,3 @@
-// MAKING CHANGE TO SEE IF GITHUB WORKS!!
-
 #include "slab.hpp"
 
 // pushers for 3d slab gk simulation. 
