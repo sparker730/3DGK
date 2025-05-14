@@ -1,3 +1,8 @@
+#include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <chrono>
 #include <string>
 #include "MultiArrays.hpp"
 #pragma once

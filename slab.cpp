@@ -1,8 +1,3 @@
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <chrono>
 #include "slab.hpp"
 
 using namespace std; 
