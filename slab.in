@@ -1,0 +1,11 @@
+mu0	eps0	e	B	mi	me
+1.	1.	1.	1.	1.	0.001	
+
+nm	dt	B	nsnap
+100	10.	1.	5
+
+im	jm	km	Lx	Ly	Lz
+8	8	8	16.	16.	1600.
+
+mm	kappaT	kappan	gyropts
+1000	0.1	0.0	4
