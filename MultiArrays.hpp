@@ -10,6 +10,11 @@ public:
        x_ = x;
        y_ = y;
        z_ = z;
+       size_ = x_ * y_ * z_;
+    }
+
+    void clear() {
+        std::fill(data_, data_+size_, T{});//T{} instead of 0 because of complex types where 0 is real
     }
 
     int getX(){
@@ -23,12 +28,26 @@ public:
     int getZ(){
         return z_;
     }
-    
+
+    T* start() {
+        return data_;
+    }
+
     inline T& operator()(const std::size_t i, const std::size_t j, const std::size_t k) {
         return data_[k + (j * y_) + (i * x_ * y_)];
     }
+
+    inline Array3D& operator=(const Array3D &arr){
+        for(auto i = 0; i < size_; ++i){
+            data_[i] = arr.data_[i];
+        }
+        return *this;
+    }
+
+
 private:
     T* data_ = nullptr;
+    std::size_t size_ = 0;
     std::size_t x_ = 0;
     std::size_t y_ = 0;
     std::size_t z_ = 0;
