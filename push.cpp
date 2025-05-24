@@ -8,7 +8,7 @@ void push(char flag,
 float xm[],float ym[],float zm[],float mu[],float vzm[],float wm[],
 float xn[],float yn[],float zn[],float vzn[],float wn[],
 float xp[],float yp[],float zp[],float vzp[],float wp[],
-int mm,Array3D<float> Ex, Array3D<float> Ey,Array3D<float> Ez,
+int mm,Array3D<float> &Ex, Array3D<float> &Ey,Array3D<float> &Ez,
 int im,int jm,int km,float lx,float ly,float lz,float dt,
 float e, float Mi,float Ti,float B) { 
      

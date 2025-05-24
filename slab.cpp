@@ -28,8 +28,6 @@ int main() {
   vt=sqrt(Ti/Mi);
 
 // Static arrays for the 3D field grids to keep indexing simple
-  //float den[im * jm * km];
-  float *den = new float[im * jm * km];
   float phi[im][jm][km];
 //  float x[mm],y[mm],z[mm];
 //  float vx[mm],vpar[mm],mu[mm];
@@ -38,17 +36,10 @@ int main() {
   float xp[mm],yp[mm],zp[mm],vzp[mm],wp[mm];
 // declare variables used in main
 
-  Array3D<float> den3D; //issue with scoping here.
-  den3D.CreateArray3D(den, im, jm, km);
-
-  float *Ex = new float[im * jm * km]; 
-  float *Ey = new float[im * jm * km]; float *Ez = new float[im * jm * km];
-  Array3D<float> Ex3D; 
-  Array3D<float> Ey3D; Array3D<float> Ez3D;
-  Ex3D.CreateArray3D(Ex,im,jm,km);
-  Ey3D.CreateArray3D(Ey,im,jm,km); Ez3D.CreateArray3D(Ez,im,jm,km);
-
-
+  Array3D<float> den3D(im, jm, km);
+  Array3D<float> Ex3D(im, jm, km); 
+  Array3D<float> Ey3D(im, jm, km);
+  Array3D<float> Ez3D(im, jm, km);
 
 // load particles
   printf("before load\n");
@@ -75,7 +66,7 @@ int main() {
 	xp,yp,zp,vzp,wp,mm,Ex3D, Ey3D, Ez3D,
 	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);
 	printf("after ppush\n");
-        deposit(xp,yp,zp,mm,den3D,im,jm,km,lx,ly,lz);
+  deposit(xp,yp,zp,mm,den3D,im,jm,km,lx,ly,lz);
 // poisson
 // grid
 // corrector push
@@ -83,8 +74,6 @@ int main() {
 // poisson
 // grad
     }
-
-  delete[] den;
   
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
@@ -130,7 +119,7 @@ void load(float xn[],float yn[],float zn[],float vzn[],float mu[],
 //-------------------------------------------------------------------------------------------------------------------------------------------------------- 
 
 // deposits density from particles on the grid
-void deposit(float x[],float y[],float z[],int mm,Array3D<float> den,int im,int jm,int km,float lx,float ly,float lz) {      
+void deposit(float x[],float y[],float z[],int mm,Array3D<float> &den,int im,int jm,int km,float lx,float ly,float lz) {      
 // assumes particles are in bounds. no bounds checking. x>=0, x<lx, etc.
 
   int m,i,j,k,ip,jp,kp;
@@ -199,7 +188,7 @@ void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, fl
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //prints values to arg1 (file name) using arg2 (array)
-void print3DArray(string fileName, Array3D<float> array){
+void print3DArray(string fileName, Array3D<float> &array){
   // Open file and set premission to write only
   ofstream outFile(fileName); 
   if (outFile.fail())

@@ -3,9 +3,19 @@
 template<typename T>
 class Array3D {
 public:
-    Array3D(){}
+    Array3D(size_t xsize, size_t ysize, size_t zsize) : x_(xsize), y_(ysize), z_(zsize){
+        this->data_ = new T[x_ * y_ * z_];
+        std::fill(this->data_, this->data_ + (x_*y_*z_), 0);
+    }
 
-    void CreateArray3D(const T* const data, const std::size_t x, const std::size_t y, const std::size_t z) {
+    ~Array3D() {
+        this->x_=0;
+        this->y_=0;
+        this->z_=0;
+        delete[] this->data_;
+    }
+
+    void CreateArray3D(const T* const data, const std::size_t x, const std::size_t y, const std::size_t z) { //legacy?
        data_ = const_cast<T*>(data);
        x_ = x;
        y_ = y;
