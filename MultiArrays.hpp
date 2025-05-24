@@ -6,6 +6,7 @@ public:
     Array3D(size_t xsize, size_t ysize, size_t zsize) : x_(xsize), y_(ysize), z_(zsize){
         this->data_ = new T[x_ * y_ * z_];
         std::fill(this->data_, this->data_ + (x_*y_*z_), 0);
+        size_ = x_*y_*z_;
     }
 
     ~Array3D() {
@@ -61,4 +62,45 @@ private:
     std::size_t x_ = 0;
     std::size_t y_ = 0;
     std::size_t z_ = 0;
+};
+
+template<typename T>
+class Array2D{
+    public:
+    Array2D(size_t xsize, size_t ysize) : x_(xsize), y_(ysize){
+        this->data_ = new T[x_ * y_];
+        std::fill(this->data_, this->data_ + (x_*y_));
+        size_ = x_*y_;
+    }
+
+    ~Array2D(){
+        x_ = 0;
+        y_ = 0;
+        delete[] this->data_;
+    }
+
+    void clear() {
+        std::fill(data_, data_+size_, T{});
+    }
+
+    T* start() {
+        return data_;
+    }
+
+    inline T& operator()(const std::size_t i, const std::size_t j) {
+        return data_[j * x_ + i];
+    }
+
+    inline Array2D& operator=(const Array2D &arr){
+        for(auto i = 0; i < size_; ++i){
+            data_[i] = arr.data_[i];
+        }
+        return *this;
+    }
+
+    private:
+    T* data_ = nullptr;
+    size_t x_ = 0;
+    size_t y_ = 0;
+    size_t size_ = 0;
 };
