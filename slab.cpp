@@ -213,15 +213,18 @@ void print3DArray(string fileName, Array3D<float> &array){
 
 //this function will print the values: x,y,z,vpar, and mu (in that order) to the file particle.csv
 void printParticleValues(int mm, float x[], float y[], float z[], float vpar[], float mu[]){
-  ofstream outFile("particle.csv"); 
+  ofstream outFile("particle.dat"); 
   if (outFile.fail())
     {  
-      printf("Error! Could not open file: particle.csv\n");
+      printf("Error! Could not open file: particle.dat\n");
       exit(-1);
     }
   outFile << "x,   y,    z,     vpar,     mu\n";
   for(int i = 0; i < mm; ++i){
-    outFile << setprecision(5) << x[i] << ", " <<  y[i] << ", " <<  z[i] << ", " <<  vpar[i] << ", " <<  mu[i] << "\n";
+    outFile << setprecision(5) << x[i] << "  " <<  y[i] << "  " <<  z[i] << "  " <<  vpar[i] << "  " <<  mu[i];
+    if(i+1 < mm){
+      outFile << "\n";
+    }
   }
   outFile.close();
 }
