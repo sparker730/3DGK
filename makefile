@@ -13,4 +13,4 @@ push.o:		push.cpp slab.hpp MultiArrays.hpp
 	$(CPP) $(OPT) -c push.cpp
 
 clean:
-	rm *.csv *.o slab
+	rm *.csv *.o *.dat slab 
