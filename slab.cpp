@@ -61,16 +61,17 @@ int main() {
     for (n = 0; n <= nm; n++) {
         printf("timestep n=%d\n", n);
 // pre-push
-	printf("before ppush\n");
 	push('p',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
 	xp,yp,zp,vzp,wp,mm,Ex3D, Ey3D, Ez3D,
 	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);
-	printf("after ppush\n");
   deposit(xp,yp,zp,mm,den3D,im,jm,km,lx,ly,lz);
 // poisson
 // grid
 // corrector push
-//        deposit(xn,yn,zn,mm,den3D,im,jm,km,lx,ly,lz);
+	push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
+	xp,yp,zp,vzp,wp,mm,Ex3D, Ey3D, Ez3D,
+	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
+        deposit(xn,yn,zn,mm,den3D,im,jm,km,lx,ly,lz);
 // poisson
 // grad
     }
