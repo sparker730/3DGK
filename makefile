@@ -1,11 +1,11 @@
-OBJ=slab.o push.o 
+OBJ=slab.o push.o #poisson.o
 LIB=-lfftw3f -lm
 CPP=g++
 OPT=
 DEB_OPT = -g -O0 -fno-omit-frame-pointer -Wall -Wextra -fsanitize=address
 DEB_LIB=-fsanitize=address
 
-slab:	slab.o push.o 
+slab:	slab.o push.o #poisson.o
 	$(CPP) $(OPT) -o slab $(OBJ) $(LIB)
 
 slab.o:		slab.cpp slab.hpp MultiArrays.hpp
