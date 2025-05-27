@@ -64,7 +64,6 @@ int main() {
   
 //    exit(0);
 // Calculate E from phi 
-  //phi = den; //temporary
   grad(phi, Ex, Ey, Ez, f, numc, p); //E,phi,im,jm,km,dx,dy,dz
   
 // main time loop
@@ -76,17 +75,17 @@ int main() {
     xp,yp,zp,vzp,wp, mm, Ex, Ey, Ez, im, jm, km, lx, ly, lz, dt, e, Mi, Ti, B);
     printf("after ppush\n");
     deposit(xp, yp, zp, den, f, numc);
-    // poisson(den, phi, im, jm, km, lx, ly, lz);
+    //poisson(den, phi, im, jm, km, lx, ly, lz);
   // grid
   // corrector push
     push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
     xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez, im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
     deposit(xn, yn, zn, den, f, numc);
-    // poisson(den, phi, im, jm, km, lz, ly, lz);
+    //poisson(den, phi, im, jm, km, lz, ly, lz);
     grad(phi, Ex, Ey, Ez, f, numc, p);
   }
 
-  // CleanupFFT();
+   CleanupFFT();
 
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);

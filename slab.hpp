@@ -57,7 +57,7 @@ int im,int jm,int km,float lx,float ly,float lz,float dt,
 float e, float Mi,float Ti,float B);
 void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<float> &phi, 
 		  FieldConst &f, NumericalConst &numc, ParticleConst &p);
-// void poisson(Array3D<float> &den, Array3D<float> &phi, const int im, const int jm, const int km,
-//              const float lx, const float ly, const float lz);
-// void CleanupFFT();
-// void srcbes(const float biz, float& gam0, float& gam1);
+void poisson(Array3D<float> &den, Array3D<float> &phi, const int im, const int jm, const int km,
+             const float lx, const float ly, const float lz);
+void CleanupFFT();
+void srcbes(const float biz, float& gam0, float& gam1);

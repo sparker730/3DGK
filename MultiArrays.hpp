@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 
 template<typename T>
@@ -101,4 +102,41 @@ class Array2D{
     size_t x_ = 0;
     size_t y_ = 0;
     size_t size_ = 0;
+};
+
+// 3D array class with column-major order
+template<typename T>
+class Array3D_Old {
+public:
+   Array3D_Old(){}
+
+   void CreateArray3D(const T* const data, const std::size_t x, const std::size_t y, const std::size_t z){
+      data_ = const_cast<T*>(data);
+      x_ = x; 
+      y_ = y;
+      z_ = z;
+      size_ = x * y * z;
+   }
+
+   void Clear(){
+      if (data_ != nullptr){std::fill(data_,data_+x_*y_*z_,0);}
+   }
+
+   inline T& operator()(const std::size_t i, const std::size_t j, const std::size_t k) {
+      return data_[k + (j * y_) + (i * x_ * y_)];
+   }
+
+   inline Array3D_Old& operator=(const Array3D_Old &arr) {
+      for(auto i = 0; i < size_; ++i){
+         data_[i] = arr.data_[i];
+      }
+      return *this;
+   }
+
+private:
+   T* data_ = nullptr;
+   std::size_t x_ = 0;
+   std::size_t y_ = 0;
+   std::size_t z_ = 0;
+   std::size_t size_ = 0;
 };
