@@ -43,8 +43,6 @@ void load(float xn[],float yn[],float zn[],float vzn[],float mu[],
 void deposit(float x[],float y[],float z[],float mu[],float w[],int mm,Array3D<float> &den,int im,int jm,int km,float lx,float ly,float lz,float e,float Mi,float B);
 void init(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
                 float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts);
-void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
-                float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts);
 void print3DArray(std::string fileName, Array3D<float> &den);
 void printParticleValues(const int mm,float x[],float y[], float z[], float vpar[], float mu[]);
 double revers(const int& num, const int& n);

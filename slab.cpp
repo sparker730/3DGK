@@ -167,14 +167,6 @@ void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<fl
 //Iniailizes Slab for run (All this does at the moment is call the function readParams)
 void init(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
                 float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts){
-  readParams(B,nm, dt, nsnap, mm, lx, ly, lz, mu0, eps0, e, Mi, Me, im, jm, km, kappaT, kappan, gyropts);
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//reads and initializes parameter values from the file slab.in
-void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
-                float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts){
   FILE *in_file = fopen("slab.in", "r");
   if (in_file == NULL)
   {  
@@ -195,6 +187,7 @@ void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, fl
   }
   fclose(in_file);
 }
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
