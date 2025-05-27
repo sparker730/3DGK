@@ -4,6 +4,9 @@
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <complex>
+#include <vector>
+#include <fftw3.h>
 #include "MultiArrays.hpp"
 #pragma once
 
@@ -24,3 +27,9 @@ float xp[],float yp[],float zp[],float vzp[],float wp[],
 int mm,Array3D<float> &Ex, Array3D<float> &Ey,Array3D<float> &Ez,
 int im,int jm,int km,float lx,float ly,float lz,float dt,
 float e, float Mi,float Ti,float B);
+void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<float> &phi, 
+		  int im, int jm, int km, int lx, int ly, int lz);
+void poisson(Array3D<float> &den, Array3D<float> &phi, const int im, const int jm, const int km,
+             const float lx, const float ly, const float lz);
+void CleanupFFT();
+void srcbes(const float biz, float& gam0, float& gam1);

@@ -4,16 +4,14 @@ template<typename T>
 class Array3D {
 public:
     Array3D(size_t xsize, size_t ysize, size_t zsize) : x_(xsize), y_(ysize), z_(zsize){
-        this->data_ = new T[x_ * y_ * z_];
-        std::fill(this->data_, this->data_ + (x_*y_*z_), 0);
+        data_ = new T[x_ * y_ * z_];
+        std::fill(data_, data_ + (x_*y_*z_), 0);
         size_ = x_*y_*z_;
     }
 
     ~Array3D() {
-        this->x_=0;
-        this->y_=0;
-        this->z_=0;
-        delete[] this->data_;
+        data_ = NULL;
+        delete[] data_;
     }
 
     void CreateArray3D(const T* const data, const std::size_t x, const std::size_t y, const std::size_t z) { //legacy?

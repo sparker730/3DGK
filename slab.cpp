@@ -28,7 +28,7 @@ int main() {
   vt=sqrt(Ti/Mi);
 
 // Static arrays for the 3D field grids to keep indexing simple
-  float phi[im][jm][km];
+  //float phi[im][jm][km];
 //  float x[mm],y[mm],z[mm];
 //  float vx[mm],vpar[mm],mu[mm];
   float xn[mm],yn[mm],zn[mm],vzn[mm],wn[mm],mu[m];
@@ -36,10 +36,11 @@ int main() {
   float xp[mm],yp[mm],zp[mm],vzp[mm],wp[mm];
 // declare variables used in main
 
-  Array3D<float> den3D(im, jm, km);
-  Array3D<float> Ex3D(im, jm, km); 
-  Array3D<float> Ey3D(im, jm, km);
-  Array3D<float> Ez3D(im, jm, km);
+  static Array3D<float> den(im, jm, km); 
+  static Array3D<float> Ex(im, jm, km);  
+  static Array3D<float> Ey(im, jm, km);
+  static Array3D<float> Ez(im, jm, km);
+  static Array3D<float> phi(im, jm, km);
 
 // load particles
   printf("before load\n");
@@ -47,40 +48,40 @@ int main() {
 	mm,lx,ly,lz,vt,B,Mi);
   printf("before deposit\n");
 //  deposit the particles on the grid
-  deposit(xn,yn,zn,mm,den3D,im,jm,km,lx,ly,lz);
+  deposit(xn,yn,zn,mm,den,im,jm,km,lx,ly,lz);
   printf("after deposit\n");
   
-  print3DArray("den.csv", den3D);
+  print3DArray("den.csv", den);
   printParticleValues(mm, xn, yn, zn, vzn, mu);
   
  //    exit(0);
 // Calculate E from phi
-//  grad(E,phi,im,jm,km,dx,dy,dz)
+  grad(Ex, Ey, Ez,phi,im,jm,km,lx,ly,lz);
 
 // main time loop
     for (n = 0; n <= nm; n++) {
         printf("timestep n=%d\n", n);
 // pre-push
 	push('p',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
-	xp,yp,zp,vzp,wp,mm,Ex3D, Ey3D, Ez3D,
+	xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez,
 	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);
-  deposit(xp,yp,zp,mm,den3D,im,jm,km,lx,ly,lz);
+  deposit(xp,yp,zp,mm,den,im,jm,km,lx,ly,lz);
 // poisson
+  //poisson(den, phi, im, jm, km, lx, ly, lz);
 // grid
 // corrector push
 	push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
-	xp,yp,zp,vzp,wp,mm,Ex3D, Ey3D, Ez3D,
+	xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez,
 	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
-        deposit(xn,yn,zn,mm,den3D,im,jm,km,lx,ly,lz);
+        deposit(xn,yn,zn,mm,den,im,jm,km,lx,ly,lz);
 // poisson
 // grad
     }
   
   auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  std::cout << "Execution time: " << duration.count() << " microseconds" << std::endl;
-
+  std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
 return 0;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,6 +115,47 @@ void load(float xn[],float yn[],float zn[],float vzn[],float mu[],
 
     xp[m]=xn[m];yp[m]=yn[m];zp[m]=zn[m];vzp[m]=vzn[m];
     xm[m]=xn[m];ym[m]=yn[m];zm[m]=zn[m];vzm[m]=vzn[m];
+  }
+}
+
+void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<float> &phi, int im, int jm, int km, int lx, int ly, int lz){
+    float dx=lx/(float)im;
+    float dy=ly/(float)jm;
+    float dz=lz/(float)km;
+
+  for(int i = 0; i < im; ++i){
+    for(int j = 0; j < jm; ++j){
+      for(int k = 0; k < km; ++k){
+        if(i == 0){
+          Ex(0, j, k) = (phi(im-1, j, k) - phi(1, j, k))/(2.*dx);
+        }
+        else if(i == im-1){
+          Ex(im, j, k) = (phi(im-2, j, k)-phi(0, j, k))/(2.*dx);
+        }
+        else{
+          Ex(i,j,k) = (phi(i-1, j, k) - phi(i+1, j, k))/(2.*dx);
+        }
+       
+        if(j == 0){
+          Ey(i,0,k) = (phi(i, jm-1, k) - phi(i, 1, k))/(2.*dy);
+        }
+        else if(j == jm-1){
+          Ey(i, jm-1, k) = (phi(i, jm-2, k) - phi(i, 0, k))/(2.*dy);
+        } else{
+          Ey(i,j,k) = (phi(i, j-1, k) - phi(i, j+1, k))/(2.*dy);  
+        }
+
+        if(k == 0){
+          Ez(i, j, 0) = (phi(i, j, km-1) - phi(i, j, 1))/(2.*dz);
+        }
+        else if(k == km-1){
+          Ez(i,j,km-1) = (phi(i,j,km-1) - phi(i,j,0))/(2.*dz);
+        }
+        else{
+          Ez(i,j,k) =  (phi(i, j, k-1) - phi(i, j, k+1))/(2.*dz);
+        }
+      }
+    }
   }
 }
 
