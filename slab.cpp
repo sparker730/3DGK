@@ -2,14 +2,14 @@
 
 using namespace std; 
 // declare global variables, these are fixed physical constants
-    float mu0,eps0,e, mi, me, dt; //added some of the slab.in vars, makes my life simpler and sets it up in case we want to use it
+   // float mu0,eps0,e, mi, me, dt; //added some of the slab.in vars, makes my life simpler and sets it up in case we want to use it
 
 // All variables in next 5 lines read in by init.
-    float kappaT, kappan; 
-    int im, jm, km;
-    int nm;
-    int gyropts;
-    int nsnap;
+    // float kappaT, kappan; 
+    // int im, jm, km;
+    // int nm;
+    // int gyropts;
+    // int nsnap;
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 int main() { 
@@ -17,89 +17,100 @@ int main() {
 
   int m,mm;//,im,jm,km;
   int n;
-
-// all variables in next 3 lines read in by init.  
+  int im, jm, km;
+  int nm;
+  int gyropts;
+  int nsnap;
+// all variables in next 5 lines read in by init.  
   float lx,ly,lz;
   float vt,B=1.,Mi=1.,Me=0.01;
   float Ti=1.,Te=1.;
-
+  float mu0,eps0,e, mi, me, dt; 
+  float kappaT, kappan; 
+    
   // set parameters
-  init(B, nm, dt, nsnap, mm, lx, ly, lz);
-  vt=sqrt(Ti/Mi);
+  FieldConst f;
+  NumericalConst numc; //use these in init instead?
+  ParticleConst p;
 
-// Static arrays for the 3D field grids to keep indexing simple
-  //float phi[im][jm][km];
+  init(B, nm, dt, nsnap, mm, lx, ly, lz, mu0, eps0, e, mi, me, im, jm, km, kappan, kappaT,gyropts);
+  f = {B, mu0, eps0, lx, ly, lz, nsnap};
+  numc = {im, jm, km, nm, dt, mm};
+  p = {e, gyropts, kappaT, kappan, Mi, Me};
+  vt=sqrt(Ti/Mi);
+  
 //  float x[mm],y[mm],z[mm];
 //  float vx[mm],vpar[mm],mu[mm];
   float xn[mm],yn[mm],zn[mm],vzn[mm],wn[mm],mu[m];
   float xm[mm],ym[mm],zm[mm],vzm[mm],wm[mm];
   float xp[mm],yp[mm],zp[mm],vzp[mm],wp[mm];
-// declare variables used in main
 
-  static Array3D<float> den(im, jm, km); 
-  static Array3D<float> Ex(im, jm, km);  
-  static Array3D<float> Ey(im, jm, km);
-  static Array3D<float> Ez(im, jm, km);
-  static Array3D<float> phi(im, jm, km);
+  Array3D<float> den(im,jm,km);
+  Array3D<float> phi(im,jm,km);
+  Array3D<float> Ex(im,jm,km); 
+  Array3D<float> Ey(im,jm,km); 
+  Array3D<float> Ez(im,jm,km);
 
 // load particles
   printf("before load\n");
-  load(xn,yn,zn,vzn,mu,xp,yp,zp,vzp,xm,ym,zm,vzm,
-	mm,lx,ly,lz,vt,B,Mi);
+  load(xn, yn, zn, vzn, mu, xp, yp, zp, vzp, xm, ym, zm, vzm, vt, f, numc, p);
   printf("before deposit\n");
 //  deposit the particles on the grid
-  deposit(xn,yn,zn,mm,den,im,jm,km,lx,ly,lz);
+  deposit(xn,yn,zn,den,f,numc);
   printf("after deposit\n");
   
   print3DArray("den.csv", den);
   printParticleValues(mm, xn, yn, zn, vzn, mu);
   
- //    exit(0);
-// Calculate E from phi
-  grad(Ex, Ey, Ez,phi,im,jm,km,lx,ly,lz);
-
-// main time loop
-    for (n = 0; n <= nm; n++) {
-        printf("timestep n=%d\n", n);
-// pre-push
-	push('p',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
-	xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez,
-	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);
-  deposit(xp,yp,zp,mm,den,im,jm,km,lx,ly,lz);
-// poisson
-  //poisson(den, phi, im, jm, km, lx, ly, lz);
-// grid
-// corrector push
-	push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
-	xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez,
-	im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
-        deposit(xn,yn,zn,mm,den,im,jm,km,lx,ly,lz);
-// poisson
-// grad
-    }
+//    exit(0);
+// Calculate E from phi 
+  //phi = den; //temporary
+  grad(phi, Ex, Ey, Ez, f, numc, p); //E,phi,im,jm,km,dx,dy,dz
   
+// main time loop
+  for (n = 0; n <= nm; n++) {
+    printf("timestep n=%d\n", n);
+  // pre-push
+	  printf("before ppush\n");
+    push('p',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
+    xp,yp,zp,vzp,wp, mm, Ex, Ey, Ez, im, jm, km, lx, ly, lz, dt, e, Mi, Ti, B);
+    printf("after ppush\n");
+    deposit(xp, yp, zp, den, f, numc);
+    // poisson(den, phi, im, jm, km, lx, ly, lz);
+  // grid
+  // corrector push
+    push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
+    xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez, im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
+    deposit(xn, yn, zn, den, f, numc);
+    // poisson(den, phi, im, jm, km, lz, ly, lz);
+    grad(phi, Ex, Ey, Ez, f, numc, p);
+  }
+
+  // CleanupFFT();
+
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
   std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
-return 0;
+
+  return 0;
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 void load(float xn[],float yn[],float zn[],float vzn[],float mu[],
 	float xp[],float yp[],float zp[],float vzp[],
 	float xm[],float ym[],float zm[],float vzm[],
-	int mm,float lx,float ly,float lz,float vt, float B, float Mi) {
+	float vt, FieldConst &f, NumericalConst &numc, ParticleConst &p) {
   int m; 
   float r1,r2,r3,vperp2;
         
-  for (m = 0; m < mm; ++m){
+  for (m = 0; m < numc.mm; ++m){
 //     xn[m]=lx*(float)rand()/(float)RAND_MAX;
 //     yn[m]=ly*(float)rand()/(float)RAND_MAX;
 //     zn[m]=lz*(float)rand()/(float)RAND_MAX;
-     xn[m]=lx*revers(m+1,2);
-     yn[m]=ly*revers(m+1,3);
-     zn[m]=lz*revers(m+1,5);
+     xn[m]=f.lx*revers(m+1,2);
+     yn[m]=f.ly*revers(m+1,3);
+     zn[m]=f.lz*revers(m+1,5);
   
     // for the velocity distribution, use Box-Muller transform (BMT). The BMT gives two gaussian #'s from two uniform #'s.
     // for vperp we can use one random #.  for v_parallel, we will use two and throw away one.
@@ -111,45 +122,46 @@ void load(float xn[],float yn[],float zn[],float vzn[],float mu[],
     r3=revers(m+1,13);
     vzn[m] = vt*sqrt(-2.0 * log(r1)) * cos(2.0 * M_PI * r2);
     vperp2=vt*vt*(-2.*log(r3));
-    mu[m]=0.5*Mi*vperp2/B;
+    mu[m]=0.5*p.Mi*vperp2/f.B;
 
     xp[m]=xn[m];yp[m]=yn[m];zp[m]=zn[m];vzp[m]=vzn[m];
     xm[m]=xn[m];ym[m]=yn[m];zm[m]=zn[m];vzm[m]=vzn[m];
   }
 }
 
-void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<float> &phi, int im, int jm, int km, int lx, int ly, int lz){
-    float dx=lx/(float)im;
-    float dy=ly/(float)jm;
-    float dz=lz/(float)km;
+void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<float> &phi, 
+		  FieldConst &f, NumericalConst &numc, ParticleConst &p){
+    float dx=f.lx/static_cast<float>(numc.im);
+    float dy=f.ly/static_cast<float>(numc.jm); 
+    float dz=f.lz/static_cast<float>(numc.km);
 
-  for(int i = 0; i < im; ++i){
-    for(int j = 0; j < jm; ++j){
-      for(int k = 0; k < km; ++k){
+  for(int i = 0; i < numc.im; ++i){
+    for(int j = 0; j < numc.jm; ++j){
+      for(int k = 0; k < numc.km; ++k){
         if(i == 0){
-          Ex(0, j, k) = (phi(im-1, j, k) - phi(1, j, k))/(2.*dx);
+          Ex(0, j, k) = (phi(numc.im-1, j, k) - phi(1, j, k))/(2.*dx);
         }
-        else if(i == im-1){
-          Ex(im, j, k) = (phi(im-2, j, k)-phi(0, j, k))/(2.*dx);
+        else if(i == numc.im-1){
+          Ex(numc.im, j, k) = (phi(numc.im-2, j, k)-phi(0, j, k))/(2.*dx);
         }
         else{
           Ex(i,j,k) = (phi(i-1, j, k) - phi(i+1, j, k))/(2.*dx);
         }
        
         if(j == 0){
-          Ey(i,0,k) = (phi(i, jm-1, k) - phi(i, 1, k))/(2.*dy);
+          Ey(i,0,k) = (phi(i, numc.jm-1, k) - phi(i, 1, k))/(2.*dy);
         }
-        else if(j == jm-1){
-          Ey(i, jm-1, k) = (phi(i, jm-2, k) - phi(i, 0, k))/(2.*dy);
+        else if(j == numc.jm-1){
+          Ey(i, numc.jm-1, k) = (phi(i, numc.jm-2, k) - phi(i, 0, k))/(2.*dy);
         } else{
           Ey(i,j,k) = (phi(i, j-1, k) - phi(i, j+1, k))/(2.*dy);  
         }
 
         if(k == 0){
-          Ez(i, j, 0) = (phi(i, j, km-1) - phi(i, j, 1))/(2.*dz);
+          Ez(i, j, 0) = (phi(i, j, numc.km-1) - phi(i, j, 1))/(2.*dz);
         }
-        else if(k == km-1){
-          Ez(i,j,km-1) = (phi(i,j,km-1) - phi(i,j,0))/(2.*dz);
+        else if(k == numc.km-1){
+          Ez(i,j,numc.km-1) = (phi(i,j,numc.km-1) - phi(i,j,0))/(2.*dz);
         }
         else{
           Ez(i,j,k) =  (phi(i, j, k-1) - phi(i, j, k+1))/(2.*dz);
@@ -162,29 +174,29 @@ void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<fl
 //-------------------------------------------------------------------------------------------------------------------------------------------------------- 
 
 // deposits density from particles on the grid
-void deposit(float x[],float y[],float z[],int mm,Array3D<float> &den,int im,int jm,int km,float lx,float ly,float lz) {      
+void deposit(float x[],float y[],float z[], Array3D<float> &den, FieldConst &f, NumericalConst &numc) {      
 // assumes particles are in bounds. no bounds checking. x>=0, x<lx, etc.
 
   int m,i,j,k,ip,jp,kp;
   float wght; // particle weight factor
   float dx,dy,dz,wx,wy,wz,wxp,wyp,wzp;
   
-  dx=lx/(float)im; dy=ly/(float)jm; dz=lz/(float)km;
+  dx=f.lx/(float)numc.im; dy=f.ly/(float)numc.jm; dz=f.lz/(float)numc.km;
   wght=1./(dx*dy*dz);  
-  for  (i=0;i<im;++i){
-    for  (j=0;j<jm;++j){
-      for  (k=0;k<km;++k){
+  for  (i=0;i<numc.im;++i){
+    for  (j=0;j<numc.jm;++j){
+      for  (k=0;k<numc.km;++k){
         den(i, j, k)=0;
       }
     }
   }
-  for (m=0; m<mm; m++){
+  for (m=0; m<numc.mm; m++){
     i=(int)(x[m]/dx); 
     j=(int)(y[m]/dy); 
     k=(int)(z[m]/dz);
     wx=(float)(i+1)-x[m]/dx; wy=(float)(j+1)-y[m]/dy; wz=(float)(k+1)-z[m]/dz;
     wxp=1.-wx; wyp=1.-wy; wzp=1.-wz;
-    ip=(i+1) % im; jp=(j+1) % jm; kp=(k+1) % km;
+    ip=(i+1) % numc.im; jp=(j+1) % numc.jm; kp=(k+1) % numc.km;
     den(i, j, k)=den(i, j, k)+wght*wx*wy*wz;
     den(ip, j, k)=den(ip, j, k)+wght*wxp*wy*wz;
     den(i, jp, k)=den(i, jp, k)+wght*wx*wyp*wz;
@@ -199,14 +211,16 @@ void deposit(float x[],float y[],float z[],int mm,Array3D<float> &den,int im,int
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //Iniailizes Slab for run (All this does at the moment is call the function readParams)
-void init(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz){
-  readParams(B,nm, dt, nsnap, mm, lx, ly, lz);
+void init(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
+                float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts){
+  readParams(B,nm, dt, nsnap, mm, lx, ly, lz, mu0, eps0, e, Mi, Me, im, jm, km, kappaT, kappan, gyropts);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //reads and initializes parameter values from the file slab.in
-void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz){
+void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
+                float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts){
   FILE *in_file = fopen("slab.in", "r");
   if (in_file == NULL)
   {  
@@ -217,7 +231,7 @@ void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, fl
     //Doing these by line: %*x will ignore the value, %f will map to variable in order below.
     //As example, first scan below ignores the 6 var names and reads the 6 floats. Each deals with these kinds of lines
     fscanf(in_file, "%*[^\n]\n");
-    fscanf(in_file, "%f %f %f %f %f %f", &mu0, &eps0, &e, &B, &mi, &me);
+    fscanf(in_file, "%f %f %f %f %f %f", &mu0, &eps0, &e, &B, &Mi, &Me);
     fscanf(in_file, " %*[^\n]\n"); //space at front of comment is intentional - ignores empty line
     fscanf(in_file, "%d %f %f %d", &nm, &dt, &B, &nsnap);
     fscanf(in_file, " %*[^\n]\n");
