@@ -1,11 +1,11 @@
-OBJ=slab.o push.o poisson.o
+OBJ=slab.o push.o poisson.o deposit.o
 LIB=-lfftw3f -lm
 CPP=g++
 OPT=
 DEB_OPT = -g -O0 -fno-omit-frame-pointer -Wall -Wextra -fsanitize=address
 DEB_LIB=-fsanitize=address
 
-slab:	slab.o push.o poisson.o
+slab:	slab.o push.o poisson.o deposit.o
 	$(CPP) $(OPT) -o slab $(OBJ) $(LIB)
 
 slab.o:		slab.cpp slab.hpp MultiArrays.hpp
@@ -17,5 +17,8 @@ push.o:		push.cpp slab.hpp MultiArrays.hpp
 poisson.o: poisson.cpp slab.hpp MultiArrays.hpp
 	$(CPP) $(OPT) -c poisson.cpp
 
+deposit.o: deposit.cpp slab.hpp MultiArrays.hpp
+	$(CPP) $(OPT) -c deposit.cpp
+	
 clean:
 	rm *.csv *.o *.dat slab

@@ -40,7 +40,7 @@ void load(float xn[],float yn[],float zn[],float vzn[],float mu[],
 	float xp[],float yp[],float zp[],float vzp[],
 	float xm[],float ym[],float zm[],float vzm[],
 	float vt, FieldConst &f, NumericalConst &numc, ParticleConst &p);
-void deposit(float x[],float y[],float z[], Array3D<float> &den, FieldConst &f, NumericalConst &numc);
+void deposit(float x[],float y[],float z[],float mu[],float w[],int mm,Array3D<float> &den,int im,int jm,int km,float lx,float ly,float lz,float e,float Mi,float B);
 void init(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
                 float &mu0, float &eps0, float &e, float &Mi, float &Me, int &im, int &jm, int &km, float &kappaT, float &kappan, int &gyropts);
 void readParams(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,

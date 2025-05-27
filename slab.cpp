@@ -1,15 +1,6 @@
 #include "slab.hpp"
 
-using namespace std; 
-// declare global variables, these are fixed physical constants
-   // float mu0,eps0,e, mi, me, dt; //added some of the slab.in vars, makes my life simpler and sets it up in case we want to use it
-
-// All variables in next 5 lines read in by init.
-    // float kappaT, kappan; 
-    // int im, jm, km;
-    // int nm;
-    // int gyropts;
-    // int nsnap;
+using namespace std; //bad practice but makes our lives easier for now
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 int main() { 
@@ -56,7 +47,7 @@ int main() {
   load(xn, yn, zn, vzn, mu, xp, yp, zp, vzp, xm, ym, zm, vzm, vt, f, numc, p);
   printf("before deposit\n");
 //  deposit the particles on the grid
-  deposit(xn,yn,zn,den,f,numc);
+  deposit(xn,yn,zn,mu,wp,mm,den,im,jm,km,lx,ly,lz,e,Mi,B);
   printf("after deposit\n");
   
   print3DArray("den.csv", den);
@@ -74,13 +65,13 @@ int main() {
     push('p',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
     xp,yp,zp,vzp,wp, mm, Ex, Ey, Ez, im, jm, km, lx, ly, lz, dt, e, Mi, Ti, B);
     printf("after ppush\n");
-    deposit(xp, yp, zp, den, f, numc);
+	deposit(xp,yp,zp,mu,wp,mm,den,im,jm,km,lx,ly,lz,e,Mi,B);
     // poisson(den, phi, im, jm, km, lx, ly, lz);
   // grid
   // corrector push
     push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
     xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez, im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
-    deposit(xn, yn, zn, den, f, numc);
+   deposit(xp,yp,zp,mu,wp,mm,den,im,jm,km,lx,ly,lz,e,Mi,B);
     // poisson(den, phi, im, jm, km, lz, ly, lz);
     grad(phi, Ex, Ey, Ez, f, numc, p);
   }
@@ -172,43 +163,6 @@ void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<fl
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------- 
-
-// deposits density from particles on the grid
-void deposit(float x[],float y[],float z[], Array3D<float> &den, FieldConst &f, NumericalConst &numc) {      
-// assumes particles are in bounds. no bounds checking. x>=0, x<lx, etc.
-
-  int m,i,j,k,ip,jp,kp;
-  float wght; // particle weight factor
-  float dx,dy,dz,wx,wy,wz,wxp,wyp,wzp;
-  
-  dx=f.lx/static_cast<float>(numc.im); dy=f.ly/static_cast<float>(numc.jm); dz=f.lz/static_cast<float>(numc.km);
-  wght=1./(dx*dy*dz);  
-  for  (i=0;i<numc.im;++i){
-    for  (j=0;j<numc.jm;++j){
-      for  (k=0;k<numc.km;++k){
-        den(i, j, k)=0;
-      }
-    }
-  }
-  for (m=0; m<numc.mm; m++){
-    i=static_cast<int>(x[m]/dx); 
-    j=static_cast<int>(y[m]/dy); 
-    k=static_cast<int>(z[m]/dz);
-    wx=static_cast<float>(i+1)-x[m]/dx; wy=static_cast<float>(j+1)-y[m]/dy; wz=static_cast<float>(k+1)-z[m]/dz;
-    wxp=1.-wx; wyp=1.-wy; wzp=1.-wz;
-    ip=(i+1) % numc.im; jp=(j+1) % numc.jm; kp=(k+1) % numc.km;
-    den(i, j, k)=den(i, j, k)+wght*wx*wy*wz;
-    den(ip, j, k)=den(ip, j, k)+wght*wxp*wy*wz;
-    den(i, jp, k)=den(i, jp, k)+wght*wx*wyp*wz;
-    den(ip, jp, k)=den(ip, jp, k)+wght*wxp*wyp*wz;
-    den(i, j, kp)=den(i, j, kp)+wght*wx*wy*wzp;
-    den(ip, j, kp)=den(ip, j, kp)+wght*wxp*wy*wzp;
-    den(i, jp, kp)=den(i, jp, kp)+wght*wx*wyp*wzp;
-    den(ip, jp, kp)=den(ip, jp, kp)+wght*wxp*wyp*wzp;
-  }
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //Iniailizes Slab for run (All this does at the moment is call the function readParams)
 void init(float &B, int &nm, float &dt, int &nsnap, int &mm, float &lx, float &ly, float &lz,
