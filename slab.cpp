@@ -30,7 +30,7 @@ int main() {
     
   // set parameters
   FieldConst f;
-  NumericalConst numc; //use these in init instead?
+  NumericalConst numc; //use these in init instead? Open question
   ParticleConst p;
 
   init(B, nm, dt, nsnap, mm, lx, ly, lz, mu0, eps0, e, mi, me, im, jm, km, kappan, kappaT,gyropts);
@@ -75,13 +75,13 @@ int main() {
     xp,yp,zp,vzp,wp, mm, Ex, Ey, Ez, im, jm, km, lx, ly, lz, dt, e, Mi, Ti, B);
     printf("after ppush\n");
     deposit(xp, yp, zp, den, f, numc);
-    //poisson(den, phi, im, jm, km, lx, ly, lz);
+    // poisson(den, phi, im, jm, km, lx, ly, lz);
   // grid
   // corrector push
     push('c',xm,ym,zm,mu,vzm,wm,xn,yn,zn,vzn,wn,
     xp,yp,zp,vzp,wp,mm,Ex, Ey, Ez, im,jm,km,lx,ly,lz,dt,e,Mi,Ti,B);	
     deposit(xn, yn, zn, den, f, numc);
-    //poisson(den, phi, im, jm, km, lz, ly, lz);
+    // poisson(den, phi, im, jm, km, lz, ly, lz);
     grad(phi, Ex, Ey, Ez, f, numc, p);
   }
 
@@ -133,7 +133,8 @@ void grad(Array3D<float> &Ex, Array3D<float> &Ey, Array3D<float> &Ez, Array3D<fl
     float dx=f.lx/static_cast<float>(numc.im);
     float dy=f.ly/static_cast<float>(numc.jm); 
     float dz=f.lz/static_cast<float>(numc.km);
-
+  //Dom note: We could use a switch statement here. Not sure what the warrented size of if-else statements would be to "switch", but, it is technically faster
+  //also a note: Uses assuming circular arrays: imax+1=0, and 0-1=imax, where imax = im-1 as example
   for(int i = 0; i < numc.im; ++i){
     for(int j = 0; j < numc.jm; ++j){
       for(int k = 0; k < numc.km; ++k){
@@ -180,7 +181,7 @@ void deposit(float x[],float y[],float z[], Array3D<float> &den, FieldConst &f, 
   float wght; // particle weight factor
   float dx,dy,dz,wx,wy,wz,wxp,wyp,wzp;
   
-  dx=f.lx/(float)numc.im; dy=f.ly/(float)numc.jm; dz=f.lz/(float)numc.km;
+  dx=f.lx/static_cast<float>(numc.im); dy=f.ly/static_cast<float>(numc.jm); dz=f.lz/static_cast<float>(numc.km);
   wght=1./(dx*dy*dz);  
   for  (i=0;i<numc.im;++i){
     for  (j=0;j<numc.jm;++j){
@@ -190,10 +191,10 @@ void deposit(float x[],float y[],float z[], Array3D<float> &den, FieldConst &f, 
     }
   }
   for (m=0; m<numc.mm; m++){
-    i=(int)(x[m]/dx); 
-    j=(int)(y[m]/dy); 
-    k=(int)(z[m]/dz);
-    wx=(float)(i+1)-x[m]/dx; wy=(float)(j+1)-y[m]/dy; wz=(float)(k+1)-z[m]/dz;
+    i=static_cast<int>(x[m]/dx); 
+    j=static_cast<int>(y[m]/dy); 
+    k=static_cast<int>(z[m]/dz);
+    wx=static_cast<float>(i+1)-x[m]/dx; wy=static_cast<float>(j+1)-y[m]/dy; wz=static_cast<float>(k+1)-z[m]/dz;
     wxp=1.-wx; wyp=1.-wy; wzp=1.-wz;
     ip=(i+1) % numc.im; jp=(j+1) % numc.jm; kp=(k+1) % numc.km;
     den(i, j, k)=den(i, j, k)+wght*wx*wy*wz;

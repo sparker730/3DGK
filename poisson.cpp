@@ -25,9 +25,9 @@ void poisson(Array3D<float>& den, Array3D<float>& phi, const int im, const int j
       //Are these the correct ranges? Assuming in ORB indices were 0:imx,0:jmx,0:kmx inclusive in the Fortran allocations. This means
       //C++ arrays should be (imx+1)*(jmx+1)*(kmx+1) not imx*jmx*kmx to use this logic? Same for all other loop/indexing logic below...
       //From the fourier space loop below it seems phi and formphi are indexed differently though so its confusing.
-      for (int l = 0; l <= im-1; ++l) {
-         for (int m = 0; m <= jm-1; ++m) {
-            for (int n = 0; n <= km-1; ++n) {
+      for (int l = 0; l < im; ++l) {
+         for (int m = 0; m < jm; ++m) {
+            for (int n = 0; n < km; ++n) {
                int l1 = l;
                int m1 = m;
                int n1 = n;
@@ -95,8 +95,6 @@ void poisson(Array3D<float>& den, Array3D<float>& phi, const int im, const int j
       phik3D.CreateArray3D(reinterpret_cast<std::complex<float>*>(phik),im,jm,km/2+1);
       std::cout << "Created FFT plans." << std::endl;
    }
-   
-   //std::cout << phik3D.start() << std::endl;
 
    //Transform to Fourier space.
    std::cout << "Transform to fourier space." << std::endl;
@@ -104,8 +102,8 @@ void poisson(Array3D<float>& den, Array3D<float>& phi, const int im, const int j
 
    //Apply form factor and ifft scaling. 
    for (int i = 1; i <= im; ++i) {
-      for (int j = 1; j <= jm; ++j) {
-         for (int k = 1; k <= (km/2 + 1); ++k) {
+      for (int j = 1; j <= jm; ++j) {              
+         for (int k = 1; k <= (km/2 + 1); ++k) {   
             //Scale the data by array size (im*jm*km) for ifft to give back correct values in real space. Assuming this can be done early.
             //phik3D(i,j,k) = formphi3D(i-1,j-1,k-1)*phik3D(i,j,k)*static_cast<float>(im*jm*km); ORB version. Different scaling in fft?
             phik3D(i-1,j-1,k-1) = formphi3D(i-1,j-1,k-1)*phik3D(i-1,j-1,k-1)/static_cast<float>(im*jm*km);
